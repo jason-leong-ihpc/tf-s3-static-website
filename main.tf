@@ -7,9 +7,9 @@ resource "aws_s3_bucket" "static_bucket" {
 resource "aws_s3_bucket_public_access_block" "enable_public_access" {
   bucket = aws_s3_bucket.static_bucket.id
 
-  block_public_acls       = false
+  block_public_acls       = true
   block_public_policy     = false
-  ignore_public_acls      = false
+  ignore_public_acls      = true
   restrict_public_buckets = false
 }
 
@@ -17,20 +17,22 @@ resource "aws_s3_bucket_public_access_block" "enable_public_access" {
 resource "aws_s3_bucket_policy" "allow_public_access" {
   bucket     = aws_s3_bucket.static_bucket.id
   depends_on = [aws_s3_bucket_public_access_block.enable_public_access]
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Sid" : "PublicReadGetObject",
-        "Principal" : "*",
-        "Effect" : "Allow",
-        "Action" : [
-          "s3:GetObject"
-        ],
-        "Resource" : ["${aws_s3_bucket.static_bucket.arn}/*"]
-      }
-    ]
-  })
+  policy =  data.aws_iam_policy_document.allow_access_from_another_account.json
+  #ALTERNATIVE METHOD
+  # policy = jsonencode({
+  #   "Version" : "2012-10-17",
+  #   "Statement" : [
+  #     {
+  #       "Sid" : "PublicReadGetObject",
+  #       "Principal" : "*",
+  #       "Effect" : "Allow",
+  #       "Action" : [
+  #         "s3:GetObject"
+  #       ],
+  #       "Resource" : ["${aws_s3_bucket.static_bucket.arn}/*"]
+  #     }
+  #   ]
+  # })
 }
 
 
